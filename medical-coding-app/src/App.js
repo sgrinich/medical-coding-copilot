@@ -275,11 +275,11 @@ const App = () => {
       <div className="grid grid-cols-3 gap-4">
         <div
           className='doctext-area col-span-2 flex items-center justify-center'>
-          <div className='flex flex-col justify-center h-full w-full '>
+          <div className='flex flex-col justify-center h-full w-full border-radiu '>
             <h1 className='border-b border-gray-400 text-center font-bold text-2xl'>Doctor's Notes</h1>
             <textarea
               id='doc-text-input'
-              className="doc-notes-text h-full w-full flex-grow resize-none" placeholder="Enter medical notes here..." />
+              className="doc-notes-text h-full w-full flex-grow resize-none p-4" placeholder="Enter medical notes here..." />
             {/* this area show analyze notes button and med code result area */}
             <div className='flex flex-row justify-between'>
               <button

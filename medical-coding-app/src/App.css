@@ -1,4 +1,12 @@
-
-.user-text {
-    color:white
+#doc-text-input {
+  /* width: 836px;
+  height: 935px;
+  left: 128px;
+  top: 151px; */
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 21px;
+  line-height: 25px;
+  color: #000000;
 }
