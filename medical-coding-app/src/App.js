@@ -85,8 +85,8 @@ const App = () => {
 
   const fetchMedCode = async () => {
     const docTextInput = document.getElementById('doc-text-input').value;
-    const inputObj = {
-      role: 'user',
+    const promptObj = {
+      role: 'system',
       content: `You are a highly knowledgeable medical chat history analyzer assistant for medical coding and billing that is always happy to help and honest and good at extract CPT codes, which identify services rendered, as well as ICD-10 codes, which represent patient diagnoses from long doctor visit chat notes. You will never hallucinate and make up non-existent icd-code or cpt-code. I will give you examples of chat notes and formatted output code below and you will generate the completion in Javascript object with keys “icd_codes” and “cpt-codes”, each with array as their key. Inside of array is each code identified
         ###
         <Note Start ->:
@@ -244,27 +244,41 @@ const App = () => {
         <Note end ->
         <Code result -> :
         {“icd_codes”: ["M25.552"], “cpt_codes”:[“97110”,”97112”,”97161”]}
-        ###
-        <Note Start ->:
+        <Note start ->:
         ${docTextInput}
         <Note end ->
-        
-        <Code result -> :
+        <Code result ->:
         `,
     }
+    const userInputObj = {
+      role: 'user',
+      content: `According to latest Notes I provided, analyze and generate medical codes for this patient's condition. `
+    }
 
-    setConversationArr((prevConversationArr) => [instructionObj, ...prevConversationArr, inputObj]);
+    setConversationArr((prevConversationArr) => [promptObj, ...prevConversationArr, userInputObj]);
+    // const updatedConversationArr = [promptObj, ...conversationArr, userInputObj];
+    // setConversationArr(updatedConversationArr);
+    // setConversationArr((prevConversationArr) => {
+    //   const updatedConversationArr = [promptObj, ...prevConversationArr, userInputObj];
+    //   return updatedConversationArr;
+    // });
     try {
       const response = await openai.createChatCompletion({
         model: 'gpt-4-0613',
-        messages: [...conversationArr, inputObj],
+        messages: [...conversationArr, userInputObj],
         presence_penalty: 0,
         frequency_penalty: 0.3,
       });
 
       console.log(response);
       const medCodeTextResponse = response.data.choices[0].message.content;
-      setMedCode(prevMedCode => setMedCode(medCodeTextResponse));
+      setMedCode(medCodeTextResponse);
+
+      const extraUserInputObj = {
+        role: 'assistant',
+        content: 'Analyze finished.'
+      }
+      setConversationArr((prevConversationArr) => [...prevConversationArr, extraUserInputObj]);
     } catch (err) {
       console.log(err);
     }
@@ -287,13 +301,13 @@ const App = () => {
                 className='analyze-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded'
 
                 onClick={fetchMedCode}>Code Note</button>
-              <div
+              {/* <div
                 className='med-code-result-area flex flex-col justify-center items-center m-2'>
                 <h1 className='font-bold text-2xl'>Med Codes Results</h1>
                 <div className='med-code-result bg-gray-200 overflow-auto'>
                   <p className='text-center p-2'>{medCode}</p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
