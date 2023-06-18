@@ -283,7 +283,7 @@ const App = () => {
             {/* this area show analyze notes button and med code result area */}
             <div className='flex flex-row justify-between'>
               <button
-              style={{ marginTop:"20px", marginBottom:"20px"}}
+                style={{ marginTop: "20px", marginBottom: "20px" }}
                 className='analyze-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded'
 
                 onClick={fetchMedCode}>Code Note</button>
@@ -326,7 +326,7 @@ const App = () => {
               <div className='messages p-3'>
                 <div className='message'>
                   <div className='flex justify-start'>
-                    <div className='message-content chatbot-text rounded-lg bg-violet-200 p-3'>
+                    <div className='message-content chatbot-text rounded-lg bg-violet-200 p-3 whitespace-pre-wrap'>
                       <span>Hello, what can I help you with today?</span>
                     </div>
                   </div>
@@ -341,7 +341,7 @@ const App = () => {
                       if (messageObj.role === "user") {
                         return (
                           <div key={index} className='flex justify-end'>
-                            <div className='message-content user-text rounded-lg bg-violet-400 ml-5 mt-3 p-3' >
+                            <div className='message-content user-text rounded-lg bg-violet-400 ml-5 mt-3 p-3 whitespace-pre-wrap' >
                               <span>{messageObj.content}</span>
                             </div>
                           </div>
@@ -349,7 +349,7 @@ const App = () => {
                       } else if (messageObj.role === "assistant") {
                         return (
                           <div key={index} className='flex justify-start'>
-                            <div className='message-content chatbot-text rounded-lg bg-violet-200 mr-5 mt-3 p-3'>
+                            <div className='message-content chatbot-text rounded-lg bg-violet-200 mr-5 mt-3 p-3 whitespace-pre-wrap'>
                               <span>{messageObj.content}</span>
                             </div>
                           </div>
@@ -376,7 +376,7 @@ const App = () => {
           >
             <div className="chatbot-input-container flex justify-start p-3">
               <textarea
-              style={{ paddingLeft:"10px", paddingRight:"10px", paddingTop:"10px "}}
+                style={{ paddingLeft: "10px", paddingRight: "10px", paddingTop: "10px " }}
                 onKeyDown={handleKeyDown}
                 className='w-full resize-none'
                 placeholder='Type your message here...'
