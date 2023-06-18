@@ -25,6 +25,7 @@ const App = () => {
   const [conversationArr, setConversationArr] = useState([])
   const [medCode, setMedCode] = useState("")
   const chatAreaRef = useRef(null)
+  const [userInput, setUserInput] = useState('');
 
   useEffect(() => {
     // Scroll to the bottom of the chat area whenever conversationArr updates
@@ -33,7 +34,8 @@ const App = () => {
     }
   }, [conversationArr]);
 
-  const userInput = document.getElementById('user-input').value;
+  // const userInput = document.getElementById('user-input').value;
+  console.log(userInput);
 
   const fetchReply = async (userInput) => {
 
@@ -74,8 +76,11 @@ const App = () => {
 
   const submitUserInput = (e) => {
     e.preventDefault() // prevent page refresh
-    fetchReply(userInput) // call OpenAI chatcompletion API
-    document.getElementById('user-input').value = ''
+    // set userInput state variable to be the value of the input field, id=  user-input
+    const userInput = document.getElementById('user-input').value; // access input field value correctly
+    setUserInput(userInput);
+    fetchReply(userInput); // call OpenAI chatcompletion API
+    document.getElementById('user-input').value = ''; // clear input field
   }
 
   const fetchMedCode = async () => {
