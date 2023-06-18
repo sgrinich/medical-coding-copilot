@@ -283,6 +283,7 @@ const App = () => {
             {/* this area show analyze notes button and med code result area */}
             <div className='flex flex-row justify-between'>
               <button
+              style={{ marginTop:"20px", marginBottom:"20px"}}
                 className='analyze-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded'
 
                 onClick={fetchMedCode}>Analyze Notes</button>
@@ -375,6 +376,7 @@ const App = () => {
           >
             <div className="chatbot-input-container flex justify-start p-3">
               <textarea
+              style={{ paddingLeft:"10px", paddingRight:"10px", paddingTop:"10px "}}
                 onKeyDown={handleKeyDown}
                 className='w-full resize-none'
                 placeholder='Type your message here...'
