@@ -13,7 +13,6 @@ import './App.css'
 
 
 
-
 const App = () => {
   const instructionObj = { // sent this instruction object to API every time a new conversation is started
     role: "system",
@@ -26,6 +25,11 @@ const App = () => {
   const [medCode, setMedCode] = useState("")
   const chatAreaRef = useRef(null)
   const [userInput, setUserInput] = useState('');
+  const [furtherQuestion, setFurtherQuestion] = useState("");
+  const [predefinedQuestions, setPredefinedQuestions] = useState(["What is CPT code?", "What is ICD 10 code?", "Can you double check the code you extracted?", "What is my code result and provide explanation for those codes"]);
+  // Add this state variable at the top of your component
+  const [questionVisibility, setQuestionVisibility] = useState(Array(predefinedQuestions.length).fill(true));
+
 
   useEffect(() => {
     // Scroll to the bottom of the chat area whenever conversationArr updates
@@ -65,6 +69,40 @@ const App = () => {
       console.log(err);
     }
   };
+
+  // generate further question to display to user
+  const fetchFurtherQuestion = async () => {
+    // get further question according to last assistant response and set furtherQuestion state variable
+    const lastAssistantResponse = conversationArr[conversationArr.length - 1].content;
+    const userObj = {
+      role: 'user',
+      content: `< ${lastAssistantResponse} > according to this response, think about a further question you think the user is probably going to ask and curious about. remember just include the question itself, without any extra sentence like "I think you are going to ask" or "I think you are curious about". just the question itself.`
+    };
+    try {
+      const response = await openai.createChatCompletion({
+        model: 'gpt-4-0613',
+        messages: [...conversationArr, userObj],
+        presence_penalty: 0,
+        frequency_penalty: 0.3,
+      });
+      const responseText = response.data.choices[0].message.content;
+      setFurtherQuestion(responseText);
+    }
+    catch (err) {
+      console.log(err);
+    }
+
+  }
+
+  // useeffect to display updated further question to user everytime we got a new assistant response, not user input
+  useEffect(() => {
+    if (conversationArr.length > 0 && conversationArr[conversationArr.length - 1].role === 'assistant') {
+      fetchFurtherQuestion();
+    }
+  }, [conversationArr]);
+
+
+
 
   // on key press enter down, submit user input
   const handleKeyDown = (e) => {
@@ -300,7 +338,7 @@ const App = () => {
                 style={{ marginTop: "20px", marginBottom: "20px" }}
                 className='analyze-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded'
 
-                onClick={fetchMedCode}>Code Note</button>
+                onClick={fetchMedCode}>Analyze Note</button>
               {/* <div
                 className='med-code-result-area flex flex-col justify-center items-center m-2'>
                 <h1 className='font-bold text-2xl'>Med Codes Results</h1>
@@ -318,22 +356,20 @@ const App = () => {
 
           <div
             className='chat-area bg-slate-200 overflow-y-scroll h-screen ' ref={chatAreaRef}>
-            {/* this area shows a list of predefined questions for users, when click, it will send the question for api to get answer */}
-            <div className='flex flex-col justify-center m-2'>
-              <h1 className='font-bold text-xl'>click to learn...</h1>
-              <div className='predefined-questions bg-gray-200 overflow-auto '>
-                <button
-                  className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
-                  onClick={() => {
-                    fetchReply("What is the CPT code?");
-                  }}>What is CPT code?</button>
-                <button
-                  className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
-                  onClick={() => {
-                    fetchReply("What is the ICD code?");
-                  }}>What is the ICD code?</button>
-              </div>
-            </div>
+            {/* this area shows a list of further questions for users, when click, it will send the question for api to get answer, after click it would disappear and if further question state variable is null it would not appear*/}
+            {furtherQuestion && (
+              <div className='flex flex-col justify-center m-2'>
+                <h1 className='font-bold text-xl'>You probably wonder...</h1>
+                <div className='predefined-questions bg-gray-200 overflow-auto '>
+                  <button
+                    className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
+                    onClick={() => {
+                      fetchReply(furtherQuestion);
+                    }}>{furtherQuestion}</button>
+                </div>
+              </div>)}
+
+
 
 
             <div className='chatbot-response'>
@@ -384,6 +420,36 @@ const App = () => {
           </div>
 
 
+          {/* <div className='predefined-questions bg-gray-200 overflow-auto '>
+            <button
+              className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
+              onClick={() => {
+                fetchReply(furtherQuestion);
+              }}>{furtherQuestion}</button>
+          </div> */}
+          {/* map through predefined questions and render them here, after click, it remove one question bubble */}
+          <div className='predefined-questions bg-gray-200 overflow-visible '>
+            {predefinedQuestions && predefinedQuestions.map((question, index) => {
+              return (
+                <button
+                  key={index}
+                  className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
+                  // when click, change the current question's visibility to false
+
+                  onClick={() => {
+                    fetchReply(question);
+                    setQuestionVisibility(prevVisibility => {
+                      const updatedVisibility = [...prevVisibility];
+                      updatedVisibility[index] = false;
+                      return updatedVisibility;
+                    });
+
+                  }}
+
+                  style={{ display: questionVisibility[index] ? 'block' : 'none' }}>{question}</button>
+              )
+            })}
+          </div>
 
           <form
             id="form"
