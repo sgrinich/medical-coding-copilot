@@ -26,7 +26,7 @@ const App = () => {
   const chatAreaRef = useRef(null)
   const [userInput, setUserInput] = useState('');
   const [furtherQuestion, setFurtherQuestion] = useState("");
-  const [predefinedQuestions, setPredefinedQuestions] = useState(["What is CPT code?", "What is ICD 10 code?", "Can you double check the code you extracted?", "What is my code result and provide explanation for those codes"]);
+  const [predefinedQuestions, setPredefinedQuestions] = useState(["What are the CPT codes?", "What are the ICD-10 codes?", "Can you double check the code you extracted?", " Can you provide an explanation based on the original clinical note for why you chose theses ICD-10 and CPT codes?"]);
   // Add this state variable at the top of your component
   const [questionVisibility, setQuestionVisibility] = useState(Array(predefinedQuestions.length).fill(true));
 
@@ -327,9 +327,12 @@ const App = () => {
       <div className="grid grid-cols-3 gap-4">
         <div
           className='doctext-area col-span-2 flex items-center justify-center'>
-          <div className='flex flex-col justify-center h-full w-full border-radiu '>
-            <h1 className='border-b border-gray-400 text-center font-bold text-2xl'>Doctor's Notes</h1>
+          {/* <div className='flex flex-col justify-center h-full w-full border-radiu '> */}
+          <div className='flex flex-col justify-center h-full w-full border-radius ' style={{paddingTop:"20px"}}>
+
+            {/* <h1 className='border-b border-gray-400 text-center font-bold text-2xl'>Doctor's Notes</h1> */}
             <textarea
+            autoFocus
               id='doc-text-input'
               className="doc-notes-text h-full w-full flex-grow resize-none p-4" placeholder="Enter medical notes here..." />
             {/* this area show analyze notes button and med code result area */}
@@ -350,14 +353,16 @@ const App = () => {
           </div>
         </div>
         <div
-          className='col-span-1 flex flex-col h-screen'>
+          // className='col-span-1 flex flex-col h-screen'>
+          className='col-span-1 flex flex-col h-screen' style={{paddingTop:"20px"}}>
+            
 
-          <h1 className='font-bold text-2xl'>Copilot</h1>
+          {/* <h1 className='font-bold text-2xl'>Copilot</h1> */}
 
           <div
             className='chat-area bg-slate-200 overflow-y-scroll h-screen ' ref={chatAreaRef}>
             {/* this area shows a list of further questions for users, when click, it will send the question for api to get answer, after click it would disappear and if further question state variable is null it would not appear*/}
-            {furtherQuestion && (
+            {/* {furtherQuestion && (
               <div className='flex flex-col justify-center m-2'>
                 <h1 className='font-bold text-xl'>You probably wonder...</h1>
                 <div className='predefined-questions bg-gray-200 overflow-auto '>
@@ -367,7 +372,7 @@ const App = () => {
                       fetchReply(furtherQuestion);
                     }}>{furtherQuestion}</button>
                 </div>
-              </div>)}
+              </div>)} */}
 
 
 
