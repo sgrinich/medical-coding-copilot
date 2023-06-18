@@ -286,7 +286,7 @@ const App = () => {
               style={{ marginTop:"20px", marginBottom:"20px"}}
                 className='analyze-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded'
 
-                onClick={fetchMedCode}>Analyze Notes</button>
+                onClick={fetchMedCode}>Code Note</button>
               <div
                 className='med-code-result-area flex flex-col justify-center items-center m-2'>
                 <h1 className='font-bold text-2xl'>Med Codes Results</h1>
@@ -323,11 +323,11 @@ const App = () => {
 
 
             <div className='chatbot-response'>
-              <div className='messages m-3 p-3'>
+              <div className='messages p-3'>
                 <div className='message'>
                   <div className='flex justify-start'>
-                    <div className='message-content chatbot-text rounded-bl-lg bg-violet-200 m-3 p-3'>
-                      <span>assistant: Hello, what can I help you with today?</span>
+                    <div className='message-content chatbot-text rounded-lg bg-violet-200 p-3'>
+                      <span>Hello, what can I help you with today?</span>
                     </div>
                   </div>
 
@@ -341,16 +341,16 @@ const App = () => {
                       if (messageObj.role === "user") {
                         return (
                           <div key={index} className='flex justify-end'>
-                            <div className='message-content user-text rounded-tr-lg bg-violet-400 m-3 p-3' >
-                              <span>{messageObj.role}: {messageObj.content}</span>
+                            <div className='message-content user-text rounded-lg bg-violet-400 ml-5 mt-3 p-3' >
+                              <span>{messageObj.content}</span>
                             </div>
                           </div>
                         )
                       } else if (messageObj.role === "assistant") {
                         return (
                           <div key={index} className='flex justify-start'>
-                            <div className='message-content chatbot-text rounded-bl-lg bg-violet-200 m-3 p-3'>
-                              <span>{messageObj.role}: {messageObj.content}</span>
+                            <div className='message-content chatbot-text rounded-lg bg-violet-200 mr-5 mt-3 p-3'>
+                              <span>{messageObj.content}</span>
                             </div>
                           </div>
                         )
