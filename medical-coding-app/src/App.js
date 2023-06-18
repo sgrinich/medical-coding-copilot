@@ -275,10 +275,11 @@ const App = () => {
       <div className="grid grid-cols-3 gap-4">
         <div
           className='doctext-area col-span-2 flex items-center justify-center'>
-          <div className='flex flex-col justify-center h-full w-full border-radiu '>
-            <h1 className='border-b border-gray-400 text-center font-bold text-2xl'>Doctor's Notes</h1>
+          <div className='flex flex-col justify-center h-full w-full border-radius ' style={{paddingTop:"20px"}}>
+            {/* <h1 className='border-b border-gray-400 text-center font-bold text-2xl'>Doctor's Notes</h1> */}
             <textarea
               id='doc-text-input'
+              autoFocus
               className="doc-notes-text h-full w-full flex-grow resize-none p-4" placeholder="Enter medical notes here..." />
             {/* this area show analyze notes button and med code result area */}
             <div className='flex flex-row justify-between'>
@@ -298,15 +299,14 @@ const App = () => {
           </div>
         </div>
         <div
-          className='col-span-1 flex flex-col h-screen'>
+          className='col-span-1 flex flex-col h-screen' style={{paddingTop:"20px"}}>
 
-          <h1 className='font-bold text-2xl'>Copilot</h1>
+          {/* <h1 className='font-bold text-2xl'>Copilot</h1> */}
 
           <div
             className='chat-area bg-slate-200 overflow-y-scroll h-screen ' ref={chatAreaRef}>
             {/* this area shows a list of predefined questions for users, when click, it will send the question for api to get answer */}
             <div className='flex flex-col justify-center m-2'>
-              <h1 className='font-bold text-xl'>click to learn...</h1>
               <div className='predefined-questions bg-gray-200 overflow-auto '>
                 <button
                   className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
@@ -318,6 +318,16 @@ const App = () => {
                   onClick={() => {
                     fetchReply("What is the ICD code?");
                   }}>What is the ICD code?</button>
+                <button
+                  className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
+                  onClick={() => {
+                    fetchReply("Can you double check your work?");
+                  }}>Can you double check your work?</button>
+                                  <button
+                  className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
+                  onClick={() => {
+                    fetchReply("Can you double check your work?");
+                  }}>Can you provide an explanation based on the original clinical note for why you chose these ICD-10 and CPT codes?</button>
               </div>
             </div>
 
