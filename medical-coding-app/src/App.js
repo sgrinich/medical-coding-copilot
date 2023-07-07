@@ -1,8 +1,8 @@
-import React from 'react'
-import openai from './OpenAI'
-import { useState, useEffect, useRef } from 'react'
-import SendIcon from '@mui/icons-material/Send';
-import './App.css'
+import React from "react";
+import openai from "./OpenAI";
+import { useState, useEffect, useRef } from "react";
+import SendIcon from "@mui/icons-material/Send";
+import "./App.css";
 
 // // import the codes.json file here
 // import codes from './codes.json'
@@ -11,30 +11,41 @@ import './App.css'
 // const allExist = generated_code.every(element => codes['cpt-codes'].includes(element));
 // console.log(allExist);
 
-
-
 const App = () => {
-  const instructionObj = { // sent this instruction object to API every time a new conversation is started
+  const instructionObj = {
+    // sent this instruction object to API every time a new conversation is started
     role: "system",
-    content: "You are a highly knowledgeable medical history analyzer assistant for medical coding and billing that is always happy to help and honest"
+    content:
+      "You are a highly knowledgeable medical history analyzer assistant for medical coding and billing that is always happy to help and honest",
     // content:"You are an assistant that gives very short answers".
     // content: "You are a highly sarcastic assistant."
-  }
+  };
 
-  const [conversationArr, setConversationArr] = useState([])
-  const [medCode, setMedCode] = useState("")
-  const chatAreaRef = useRef(null)
-  const [userInput, setUserInput] = useState('');
+  const [conversationArr, setConversationArr] = useState([]);
+  const [medCode, setMedCode] = useState("");
+  const chatAreaRef = useRef(null);
+  const [userInput, setUserInput] = useState("");
   const [furtherQuestion, setFurtherQuestion] = useState("");
-  const [predefinedQuestions, setPredefinedQuestions] = useState(["What are the CPT codes?", "What are the ICD-10 codes?", "Can you double check the code you extracted?", " Can you provide an explanation based on the original clinical note for why you chose theses ICD-10 and CPT codes?"]);
+  const [predefinedQuestions, setPredefinedQuestions] = useState([
+    "According to this note I provided, analyze this patient's condition.",
+    "What are the CPT codes?",
+    "Explain why you chose these CPT codes.",
+    "What are the ICD-10 codes?",
+    "Explain why you chose these ICD-10 codes.",
+  ]);
   // Add this state variable at the top of your component
-  const [questionVisibility, setQuestionVisibility] = useState(Array(predefinedQuestions.length).fill(true));
-
+  const [questionVisibility, setQuestionVisibility] = useState(
+    Array(predefinedQuestions.length).fill(true)
+  );
 
   useEffect(() => {
     // Scroll to the bottom of the chat area whenever conversationArr updates
     if (chatAreaRef.current) {
       chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+    }
+
+    if (conversationArr.length === 0) {
+      setQuestionVisibility(Array(predefinedQuestions[0]));
     }
   }, [conversationArr]);
 
@@ -42,17 +53,21 @@ const App = () => {
   console.log(userInput);
 
   const fetchReply = async (userInput) => {
-
     const userObj = {
-      role: 'user',
+      role: "user",
       content: userInput,
     };
 
-    setConversationArr((prevConversationArr) => [instructionObj, ...prevConversationArr, userObj]);
+    setConversationArr((prevConversationArr) => [
+      instructionObj,
+      ...prevConversationArr,
+      userObj,
+    ]);
 
     try {
       const response = await openai.createChatCompletion({
-        model: 'gpt-4-0613',
+        model: "gpt-4-0613",
+        // model: 'gpt-3.5-turbo-0301',
         messages: [...conversationArr, userObj],
         presence_penalty: 0,
         frequency_penalty: 0.3,
@@ -61,10 +76,13 @@ const App = () => {
       console.log(response);
       const responseText = response.data.choices[0].message.content;
       const newMessageObj = {
-        role: 'assistant',
+        role: "assistant",
         content: responseText,
       };
-      setConversationArr((prevConversationArr) => [...prevConversationArr, newMessageObj]);
+      setConversationArr((prevConversationArr) => [
+        ...prevConversationArr,
+        newMessageObj,
+      ]);
     } catch (err) {
       console.log(err);
     }
@@ -73,59 +91,63 @@ const App = () => {
   // generate further question to display to user
   const fetchFurtherQuestion = async () => {
     // get further question according to last assistant response and set furtherQuestion state variable
-    const lastAssistantResponse = conversationArr[conversationArr.length - 1].content;
+    const lastAssistantResponse =
+      conversationArr[conversationArr.length - 1].content;
     const userObj = {
-      role: 'user',
-      content: `< ${lastAssistantResponse} > according to this response, think about a further question you think the user is probably going to ask and curious about. remember just include the question itself, without any extra sentence like "I think you are going to ask" or "I think you are curious about". just the question itself.`
+      role: "user",
+      content: `< ${lastAssistantResponse} > according to this response, think about a further question you think the user is probably going to ask and curious about. remember just include the question itself, without any extra sentence like "I think you are going to ask" or "I think you are curious about". just the question itself.`,
     };
     try {
       const response = await openai.createChatCompletion({
-        model: 'gpt-4-0613',
+        model: "gpt-4-0613",
+        // model: 'gpt-3.5-turbo-0301',
         messages: [...conversationArr, userObj],
         presence_penalty: 0,
         frequency_penalty: 0.3,
       });
       const responseText = response.data.choices[0].message.content;
       setFurtherQuestion(responseText);
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
     }
-
-  }
+  };
 
   // useeffect to display updated further question to user everytime we got a new assistant response, not user input
   useEffect(() => {
-    if (conversationArr.length > 0 && conversationArr[conversationArr.length - 1].role === 'assistant') {
+    if (
+      conversationArr.length > 0 &&
+      conversationArr[conversationArr.length - 1].role === "assistant"
+    ) {
       fetchFurtherQuestion();
     }
   }, [conversationArr]);
 
-
-
-
   // on key press enter down, submit user input
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // prevent newline from being inserted
       submitUserInput(e);
+
+      const textArea = document.querySelector("user-input");
+      const textRowCount = textArea ? textArea.value.split("\n").length : 0;
+      const rows = textRowCount + 1;
     }
   };
 
   const submitUserInput = (e) => {
-    e.preventDefault() // prevent page refresh
+    e.preventDefault(); // prevent page refresh
     // set userInput state variable to be the value of the input field, id=  user-input
-    const userInput = document.getElementById('user-input').value; // access input field value correctly
+    const userInput = document.getElementById("user-input").value; // access input field value correctly
     setUserInput(userInput);
     fetchReply(userInput); // call OpenAI chatcompletion API
-    document.getElementById('user-input').value = ''; // clear input field
-  }
+    document.getElementById("user-input").value = ""; // clear input field
+  };
 
   const fetchMedCode = async () => {
-    const docTextInput = document.getElementById('doc-text-input').value;
+    const docTextInput = document.getElementById("doc-text-input").value;
     const promptObj = {
-      role: 'system',
-      content: `You are a highly knowledgeable medical chat history analyzer assistant for medical coding and billing that is always happy to help and honest and good at extract CPT codes, which identify services rendered, as well as ICD-10 codes, which represent patient diagnoses from long doctor visit chat notes. You will never hallucinate and make up non-existent icd-code or cpt-code. I will give you examples of chat notes and formatted output code below and you will generate the completion in Javascript object with keys “icd_codes” and “cpt-codes”, each with array as their key. Inside of array is each code identified
+      role: "system",
+      content: `You are a highly knowledgeable medical chat history analyzer assistant for medical coding and billing that is always happy to help and honest and good at extract CPT codes, which identify services rendered, as well as ICD-10 codes, which represent patient diagnoses from long doctor visit chat notes. You will never hallucinate and make up non-existent icd-code or cpt-code. I will give you examples of chat notes and formatted output code below and you will generate the completion. 
         ###
         <Note Start ->:
         INITIAL SUBJECTIVE
@@ -182,7 +204,8 @@ const App = () => {
         
         <Code result -> :
         ‘’’
-        {“icd_codes”: [“G56”,”M25.512”,”S53.02XA”], “cpt_codes”:[“97110”,”97112”,”97162”]}
+        ICD-10 codes: G56, M25.512, and S53.02XA.
+        CPT codes: 97110, 97112, and 97162.
         ‘’’
         ###
         <Note Start ->:
@@ -233,7 +256,8 @@ const App = () => {
         <Note end ->
         
         <Code result -> :
-        {“icd_codes”: ["S54.0", "X50.1"], “cpt_codes”:[“97110”,”97112”,”97161”]}
+        ICD-10 codes: S54.0 and X50.1. 
+        CPT codes: 97110, 97112, and 971621.
         ###
         <Note Start ->:
         INITIAL SUBJECTIVE
@@ -281,19 +305,25 @@ const App = () => {
         Plan to see patient in 2 weeks to progress treatment.
         <Note end ->
         <Code result -> :
-        {“icd_codes”: ["M25.552"], “cpt_codes”:[“97110”,”97112”,”97161”]}
+        ICD-10 codes: M25.552.
+        CPT codes: 97110, 97112, and 7161.
+
         <Note start ->:
         ${docTextInput}
         <Note end ->
         <Code result ->:
         `,
-    }
+    };
     const userInputObj = {
-      role: 'user',
-      content: `According to latest Notes I provided, analyze and generate medical codes for this patient's condition. `
-    }
+      role: "user",
+      content: `According to this note I provided, analyze this patient's condition. `,
+    };
 
-    setConversationArr((prevConversationArr) => [promptObj, ...prevConversationArr, userInputObj]);
+    setConversationArr((prevConversationArr) => [
+      promptObj,
+      ...prevConversationArr,
+      userInputObj,
+    ]);
     // const updatedConversationArr = [promptObj, ...conversationArr, userInputObj];
     // setConversationArr(updatedConversationArr);
     // setConversationArr((prevConversationArr) => {
@@ -302,7 +332,8 @@ const App = () => {
     // });
     try {
       const response = await openai.createChatCompletion({
-        model: 'gpt-4-0613',
+        model: "gpt-4-0613",
+        // model: 'gpt-3.5-turbo-0301',
         messages: [...conversationArr, userInputObj],
         presence_penalty: 0,
         frequency_penalty: 0.3,
@@ -313,182 +344,170 @@ const App = () => {
       setMedCode(medCodeTextResponse);
 
       const extraUserInputObj = {
-        role: 'assistant',
-        content: 'Analyze finished.'
-      }
-      setConversationArr((prevConversationArr) => [...prevConversationArr, extraUserInputObj]);
+        role: "assistant",
+        content: "Analysis complete.",
+      };
+      setConversationArr((prevConversationArr) => [
+        ...prevConversationArr,
+        extraUserInputObj,
+      ]);
     } catch (err) {
       console.log(err);
     }
   };
 
   return (
-    <div className='flex flex-row items-center justify-evenly min-h-screen px-4 mx-4 '>
+    <div className="flex flex-row items-center justify-evenly min-h-screen px-4 mx-4 ">
       <div className="grid grid-cols-3 gap-4">
-        <div
-          className='doctext-area col-span-2 flex items-center justify-center'>
-          {/* <div className='flex flex-col justify-center h-full w-full border-radiu '> */}
-          <div className='flex flex-col justify-center h-full w-full border-radius ' style={{paddingTop:"20px"}}>
-
-            {/* <h1 className='border-b border-gray-400 text-center font-bold text-2xl'>Doctor's Notes</h1> */}
+        <div className="doctext-area col-span-2 flex items-center justify-center">
+          <div
+            className="flex flex-col justify-center h-full w-full border-radius "
+            style={{ paddingTop: "20px" }}
+          >
             <textarea
-            autoFocus
-              id='doc-text-input'
-              className="doc-notes-text h-full w-full flex-grow resize-none p-4" placeholder="Enter medical notes here..." />
-            {/* this area show analyze notes button and med code result area */}
-            <div className='flex flex-row justify-between'>
-              <button
-                style={{ marginTop: "20px", marginBottom: "20px" }}
-                className='analyze-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded'
-
-                onClick={fetchMedCode}>Analyze Note</button>
-              {/* <div
-                className='med-code-result-area flex flex-col justify-center items-center m-2'>
-                <h1 className='font-bold text-2xl'>Med Codes Results</h1>
-                <div className='med-code-result bg-gray-200 overflow-auto'>
-                  <p className='text-center p-2'>{medCode}</p>
-                </div>
-              </div> */}
-            </div>
+              autoFocus
+              id="doc-text-input"
+              className="doc-notes-text h-full w-full flex-grow resize-none p-4"
+              placeholder="Add medical note here..."
+            />
           </div>
         </div>
         <div
-          // className='col-span-1 flex flex-col h-screen'>
-          className='col-span-1 flex flex-col h-screen' style={{paddingTop:"20px"}}>
-            
-
-          {/* <h1 className='font-bold text-2xl'>Copilot</h1> */}
-
+          className="col-span-1 flex flex-col h-screen"
+          style={{ paddingTop: "20px" }}
+        >
           <div
-            className='chat-area bg-slate-200 overflow-y-scroll h-screen ' ref={chatAreaRef}>
+            className="chat-area bg-slate-100 overflow-y-scroll h-screen "
+            ref={chatAreaRef}
+          >
             {/* this area shows a list of further questions for users, when click, it will send the question for api to get answer, after click it would disappear and if further question state variable is null it would not appear*/}
-            {/* {furtherQuestion && (
-              <div className='flex flex-col justify-center m-2'>
-                <h1 className='font-bold text-xl'>You probably wonder...</h1>
-                <div className='predefined-questions bg-gray-200 overflow-auto '>
-                  <button
-                    className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
-                    onClick={() => {
-                      fetchReply(furtherQuestion);
-                    }}>{furtherQuestion}</button>
-                </div>
-              </div>)} */}
 
-
-
-
-            <div className='chatbot-response'>
-              <div className='messages p-3'>
-                <div className='message'>
-                  <div className='flex justify-start'>
-                    <div className='message-content chatbot-text rounded-lg bg-violet-200 p-3 whitespace-pre-wrap'>
-                      <span>Hello, what can I help you with today?</span>
+            <div className="chatbot-response">
+              <div className="messages p-3">
+                <div className="message">
+                  <div className="flex justify-start">
+                    <div className="message-content chatbot-text rounded-lg bg-blue-200 p-3 whitespace-pre-wrap">
+                      <span>
+                        Hello, I am your medical coding AI assistant. To begin,
+                        please add your clinical note on the left and ask me to
+                        analyze it.
+                      </span>
                     </div>
                   </div>
 
                   {/* show the robot repsponse */}
-                  {conversationArr && conversationArr.map((messageObj, index) => {
-                    // messageObj is like {role: "user", content: "hello"}
-
-                    // not render role == "system"
-                    if (messageObj.role !== "system") {
-                      // add different class name for different role
-                      if (messageObj.role === "user") {
-                        return (
-                          <div key={index} className='flex justify-end'>
-                            <div className='message-content user-text rounded-lg bg-violet-400 ml-5 mt-3 p-3 whitespace-pre-wrap' >
-                              <span>{messageObj.content}</span>
+                  {conversationArr &&
+                    conversationArr.map((messageObj, index) => {
+                      if (messageObj.role !== "system") {
+                        // add different class name for different role
+                        if (messageObj.role === "user") {
+                          return (
+                            <div key={index} className="flex justify-end">
+                              <div className="message-content user-text rounded-lg bg-blue-400 ml-5 mt-3 p-3 whitespace-pre-wrap">
+                                <span>{messageObj.content}</span>
+                              </div>
                             </div>
-                          </div>
-                        )
-                      } else if (messageObj.role === "assistant") {
-                        return (
-                          <div key={index} className='flex justify-start'>
-                            <div className='message-content chatbot-text rounded-lg bg-violet-200 mr-5 mt-3 p-3 whitespace-pre-wrap'>
-                              <span>{messageObj.content}</span>
+                          );
+                        } else if (messageObj.role === "assistant") {
+                          return (
+                            <div key={index} className="flex justify-start">
+                              <div className="message-content chatbot-text rounded-lg bg-blue-200 mr-5 mt-3 p-3 whitespace-pre-wrap">
+                                <span>{messageObj.content}</span>
+                              </div>
                             </div>
-                          </div>
-                        )
+                          );
+                        }
+                      } else {
+                        return "";
                       }
-
-                    } else {
-                      return ""
-                    }
-
-
-                  })}
+                    })}
                 </div>
-
               </div>
             </div>
-
           </div>
 
+          <div className="predefined-questions bg-slate-100 overflow-visible flex justify-end">
+            {predefinedQuestions &&
+              predefinedQuestions.map((question, index) => {
+                return (
+                  <button
+                    key={index}
+                    className="predefined-question-btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded text-left	"
+                    // when click, change the current question's visibility to false
 
-          {/* <div className='predefined-questions bg-gray-200 overflow-auto '>
-            <button
-              className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
-              onClick={() => {
-                fetchReply(furtherQuestion);
-              }}>{furtherQuestion}</button>
-          </div> */}
-          {/* map through predefined questions and render them here, after click, it remove one question bubble */}
-          <div className='predefined-questions bg-gray-200 overflow-visible '>
-            {predefinedQuestions && predefinedQuestions.map((question, index) => {
-              return (
-                <button
-                  key={index}
-                  className='predefined-question-btn bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 m-2 rounded'
-                  // when click, change the current question's visibility to false
-
-                  onClick={() => {
-                    fetchReply(question);
-                    setQuestionVisibility(prevVisibility => {
-                      const updatedVisibility = [...prevVisibility];
-                      updatedVisibility[index] = false;
-                      return updatedVisibility;
-                    });
-
-                  }}
-
-                  style={{ display: questionVisibility[index] ? 'block' : 'none' }}>{question}</button>
-              )
-            })}
+                    onClick={() => {
+                      setQuestionVisibility([]);
+                      console.log("here test: ", predefinedQuestions[0]);
+                      if (
+                        predefinedQuestions[0] ==
+                        "According to this note I provided, analyze this patient's condition."
+                      ) {
+                        console.log(
+                          "here test2: ",
+                          Array(predefinedQuestions)[0]
+                        );
+                        fetchMedCode().then(() => {
+                          console.log("test3");
+                          setQuestionVisibility(Array(predefinedQuestions[0]));
+                          setPredefinedQuestions(predefinedQuestions.slice(1));
+                        });
+                      } else {
+                        fetchReply(question).then(() => {
+                          setQuestionVisibility(Array(predefinedQuestions[0]));
+                          setPredefinedQuestions(predefinedQuestions.slice(1));
+                        });
+                      }
+                    }}
+                    style={{
+                      display: questionVisibility[index] ? "block" : "none",
+                    }}
+                  >
+                    {question}
+                  </button>
+                );
+              })}
           </div>
 
-          <form
-            id="form"
-          >
-            <div className="chatbot-input-container flex justify-start p-3">
+          <form id="form">
+            <div className="chatbot-input-container flex justify-start">
               <textarea
-                style={{ paddingLeft: "10px", paddingRight: "10px", paddingTop: "10px " }}
+                style={{
+                  paddingLeft: "10px",
+                  paddingRight: "10px",
+                  paddingTop: "10px ",
+                  // minHeight: "100px",
+                  overflow: "auto",
+                }}
                 onKeyDown={handleKeyDown}
-                className='w-full resize-none'
-                placeholder='Type your message here...'
+                className="w-full resize-none"
+                placeholder="Type your message here..."
                 name="user-input"
                 type="text"
                 id="user-input"
                 rows={1}
-                required />
+                required
+              />
               <span
                 onClick={submitUserInput}
-                className='submit-btn p-3' >
-                <SendIcon />
+                className="submit-btn p-3 bg-green-400"
+                style={{
+                  margin: "10px",
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                }}
+              >
+                <SendIcon
+                  style={{
+                    color: "white",
+                  }}
+                />
               </span>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-
-
-
-        </div >
-      </div >
-
-
-
-    </div >
-
-  )
-}
-
-export default App
+export default App;
